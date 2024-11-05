@@ -3,6 +3,17 @@ from typing import TypedDict, Literal
 from langgraph.graph import StateGraph, END
 from my_agent.utils.nodes import call_model, should_continue, tool_node
 from my_agent.utils.state import AgentState
+from langchain_openai import ChatOpenAI
+
+model = ChatOpenAI(temperature=0, model_name="gpt-4o")
+
+def tool(state):
+    return {"messages": [model.invoke(state['messages'])]}
+
+subgraph_builder = StateGraph(AgentState)
+subgraph_builder.add_node(tool)
+subgraph_builder.add_edge(START, "tool")
+subgraph = subgraph_builder.compile()
 
 
 # Define the config
@@ -14,8 +25,8 @@ class GraphConfig(TypedDict):
 workflow = StateGraph(AgentState, config_schema=GraphConfig)
 
 # Define the two nodes we will cycle between
-workflow.add_node("agent", call_model)
-workflow.add_node("action", tool_node)
+workflow.add_node("agent", subgraph)
+workflow.add_node("tool", tool_node)
 
 # Set the entrypoint as `agent`
 # This means that this node is the first one called
@@ -36,7 +47,7 @@ workflow.add_conditional_edges(
     # Based on which one it matches, that node will then be called.
     {
         # If `tools`, then we call the tool node.
-        "continue": "action",
+        "continue": "tool",
         # Otherwise we finish.
         "end": END,
     },
