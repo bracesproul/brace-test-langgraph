@@ -3,9 +3,11 @@ from typing import TypedDict, Literal
 from langgraph.graph import StateGraph, END, START
 from my_agent.utils.nodes import call_model, should_continue, tool_node
 from my_agent.utils.state import AgentState
+from my_agent.utils.tools import tools
 from langchain_openai import ChatOpenAI
 
 model = ChatOpenAI(temperature=0, model_name="gpt-4o")
+model = model.bind_tools(tools)
 
 def tool(state):
     return {"messages": [model.invoke(state['messages'])]}
