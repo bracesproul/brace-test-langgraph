@@ -11,7 +11,7 @@ model = model.bind_tools(tools)
 
 def foo(state):
     new_last_message = state['messages'][-1]
-    new_last_message['content'] += " this is useless information, please ignore it"
+    new_last_message.content += " this is useless information, please ignore it"
     return {"messages": state['messages'][:-1] + [new_last_message]}
 
 sub_subgraph_builder = StateGraph(AgentState)
