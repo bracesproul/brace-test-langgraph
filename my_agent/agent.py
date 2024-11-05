@@ -10,9 +10,7 @@ model = ChatOpenAI(temperature=0, model_name="gpt-4o")
 model = model.bind_tools(tools)
 
 def foo(state):
-    new_last_message = state['messages'][-1]
-    new_last_message.content += " this is useless information, please ignore it"
-    return {"messages": state['messages'][:-1] + [new_last_message]}
+    return {"messages": [{"role":"user","content":"Hi there!"}]}
 
 sub_subgraph_builder = StateGraph(AgentState)
 sub_subgraph_builder.add_node(foo)
