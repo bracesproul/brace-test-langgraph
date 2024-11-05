@@ -9,12 +9,24 @@ from langchain_openai import ChatOpenAI
 model = ChatOpenAI(temperature=0, model_name="gpt-4o")
 model = model.bind_tools(tools)
 
+def foo(state):
+    new_last_message = state['messages'][-1]
+    new_last_message['content'] += " this is useless information, please ignore it"
+    return {"messages"; state['messages'][:-1] + [new_last_message]}
+
+sub_subgraph_builder = StateGraph(AgentState)
+sub_subgraph_builder.add_node(foo)
+sub_subgraph_builder.add_edge(START, "foo")
+sub_subgraph = sub_subgraph_builder.compile()
+
 def tool(state):
     return {"messages": [model.invoke(state['messages'])]}
 
 subgraph_builder = StateGraph(AgentState)
+subgraph_builder.add_node("subsub", sub_subgraph)
 subgraph_builder.add_node(tool)
-subgraph_builder.add_edge(START, "tool")
+subgraph_builder.add_edge(START, "subsub")
+subgraph_builder.add_edge("subsub","tool")
 subgraph = subgraph_builder.compile()
 
 
