@@ -12,19 +12,15 @@ model = model.bind_tools(tools)
 def foo(state):
     return {"messages": [{"role":"user","content":"Hi there!"}]}
 
-sub_subgraph_builder = StateGraph(AgentState)
-sub_subgraph_builder.add_node(foo)
-sub_subgraph_builder.add_edge(START, "foo")
-sub_subgraph = sub_subgraph_builder.compile()
-
 def tool(state):
     return {"messages": [model.invoke(state['messages'])]}
 
 subgraph_builder = StateGraph(AgentState)
-subgraph_builder.add_node("subsub", sub_subgraph)
+subgraph_builder.add_node(foo)
 subgraph_builder.add_node(tool)
-subgraph_builder.add_edge(START, "subsub")
-subgraph_builder.add_edge("subsub","tool")
+subgraph_builder.add_edge(START, "foo")
+subgraph_builder.add_edge("foo", "tool")
+subgraph_builder.add_edge("tool", END)
 subgraph = subgraph_builder.compile()
 
 
