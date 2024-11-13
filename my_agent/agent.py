@@ -9,15 +9,15 @@ from langchain_openai import ChatOpenAI
 model = ChatOpenAI(temperature=0, model_name="gpt-4o")
 model = model.bind_tools(tools)
 
-def foo(state):
+def subgraph_foo_node(state):
     return {"messages": [{"role":"user","content":"Hi there!"}]}
 
-def tool(state):
+def subgraph_tool_node(state):
     return {"messages": [model.invoke(state['messages'])]}
 
 subgraph_builder = StateGraph(AgentState)
-subgraph_builder.add_node(foo)
-subgraph_builder.add_node(tool)
+subgraph_builder.add_node(subgraph_foo_node)
+subgraph_builder.add_node(subgraph_tool_node)
 subgraph_builder.add_edge(START, "subgraph_foo_node")
 subgraph_builder.add_edge("subgraph_foo_node", "subgraph_tool_node")
 subgraph_builder.add_edge("subgraph_tool_node", END)
