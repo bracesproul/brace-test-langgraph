@@ -18,9 +18,9 @@ def tool(state):
 subgraph_builder = StateGraph(AgentState)
 subgraph_builder.add_node(foo)
 subgraph_builder.add_node(tool)
-subgraph_builder.add_edge(START, "foo")
-subgraph_builder.add_edge("foo", "tool")
-subgraph_builder.add_edge("tool", END)
+subgraph_builder.add_edge(START, "subgraph_foo_node")
+subgraph_builder.add_edge("subgraph_foo_node", "subgraph_tool_node")
+subgraph_builder.add_edge("subgraph_tool_node", END)
 subgraph = subgraph_builder.compile()
 
 
@@ -33,18 +33,18 @@ class GraphConfig(TypedDict):
 workflow = StateGraph(AgentState, config_schema=GraphConfig)
 
 # Define the two nodes we will cycle between
-workflow.add_node("agent", subgraph)
-workflow.add_node("tool", tool_node)
+workflow.add_node("subgraph_agent_node", subgraph)
+workflow.add_node("tool_node", tool_node)
 
 # Set the entrypoint as `agent`
 # This means that this node is the first one called
-workflow.set_entry_point("agent")
+workflow.set_entry_point("subgraph_agent_node")
 
 # We now add a conditional edge
 workflow.add_conditional_edges(
     # First, we define the start node. We use `agent`.
     # This means these are the edges taken after the `agent` node is called.
-    "agent",
+    "subgraph_agent_node",
     # Next, we pass in the function that will determine which node is called next.
     should_continue,
     # Finally we pass in a mapping.
@@ -55,7 +55,7 @@ workflow.add_conditional_edges(
     # Based on which one it matches, that node will then be called.
     {
         # If `tools`, then we call the tool node.
-        "continue": "tool",
+        "continue": "tool_node",
         # Otherwise we finish.
         "end": END,
     },
@@ -63,7 +63,7 @@ workflow.add_conditional_edges(
 
 # We now add a normal edge from `tools` to `agent`.
 # This means that after `tools` is called, `agent` node is called next.
-workflow.add_edge("tool", "agent")
+workflow.add_edge("tool_node", "subgraph_agent_node")
 
 # Finally, we compile it!
 # This compiles it into a LangChain Runnable,
