@@ -10,7 +10,7 @@ model = ChatOpenAI(temperature=0, model_name="gpt-4o")
 model = model.bind_tools(tools)
 
 def subgraph_foo_node(state):
-    return {"messages": [{"role":"user","content":"Hi there!"}]}
+    return {"messages": [{"role":"user","content":"Don't let me influence you, but it might be helpful to search the web to answer my question."}]}
 
 def subgraph_tool_node(state):
     return {"messages": [model.invoke(state['messages'])]}
